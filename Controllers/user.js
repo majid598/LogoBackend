@@ -1,4 +1,4 @@
-import { compare } from "bcrypt";
+import bcrypt, { compare } from "bcrypt";
 import passport from "passport";
 import { TryCatch } from "../Middlewares/error.js";
 import { User } from "../Models/user.js";
@@ -123,22 +123,6 @@ const googleLogin = TryCatch(async (req, res, next) => {
   passport.authenticate("google", { scope: ["profile", "email"] });
 });
 
-const callBack = TryCatch(async (req, res, next) => {
-  // Successful authentication
-  const { id, displayName, emails, photos } = req.user;
-  let user = await User.findOne({ googleId: id });
-  if (!user) {
-    user = new User({
-      googleId: id,
-      name: displayName,
-      email: emails[0].value,
-      profile: photos[0].value,
-    });
-    await user.save();
-  }
-  res.redirect("/");
-});
-
 const editProfile = TryCatch(async (req, res, next) => {
   const { name, profile } = req.body;
   const updatedData = {
@@ -157,22 +141,42 @@ const editProfile = TryCatch(async (req, res, next) => {
 
 const resetPassword = TryCatch(async (req, res, next) => {
   const { email, password } = req.body;
-  console.log(email, password);
-  const user = await User.find({ email }).select("+password");
+  const user = await User.findOne({ email });
   if (!user) return next(new ErrorHandler("No Account Found!", 404));
 
-  user.password = password;
+  user.password = bcrypt.hash(password, 10);
 
   await user.save();
-
   return res.status(200).json({
     success: true,
     message: "Password Reseted",
   });
 });
 
+const getOtp = TryCatch(async (req, res, next) => {
+  const generateOtp = () => {
+    const otp = Math.floor(Math.random() * 90000) + 10000;
+    return otp;
+  };
+  const otp = generateOtp();
+  return res.status(200).json({
+    success: true,
+    message: `Your Otp is ${otp}`,
+  });
+});
+
+const deleteAccount = TryCatch(async (req, res, next) => {
+  const user = await User.findById(req.user);
+
+  await user.deleteOne();
+
+  return res.status(200).json({
+    success: true,
+    message: "Account Deleted",
+  });
+});
+
 export {
-  callBack,
   editProfile,
   googleLogin,
   login,
@@ -181,4 +185,6 @@ export {
   newUser,
   resetPassword,
   emailVerify,
+  getOtp,
+  deleteAccount,
 };
