@@ -4,20 +4,87 @@ import { TryCatch } from "../Middlewares/error.js";
 import { User } from "../Models/user.js";
 import { cookieOptions, sendToken } from "../Utils/features.js";
 import ErrorHandler from "../Utils/utility.js";
+import crypto from "crypto";
+import nodemailer from "nodemailer";
 
 const newUser = TryCatch(async (req, res, next) => {
-  const { email, name, password, profile } = req.body;
+  const { email, name, password } = req.body;
 
   if (!email || !name || !password)
     return next(new ErrorHandler("All Feilds Are Required", 404));
 
+  const verificationToken = crypto.randomBytes(16).toString("hex");
+
   const user = await User.create({
     email,
     name,
-    profile,
     password,
+    verificationToken,
   });
-  sendToken(res, user, 200, `Account Registration Successful`);
+
+  const verificationLink = `${process.env.CLIENT_URL}/verify-email?token=${verificationToken}`;
+
+  const transporter = nodemailer.createTransport({
+    service: "Gmail",
+    auth: {
+      user: process.env.MAIL,
+      pass: process.env.PASS,
+    },
+  });
+
+  const mailOptions = {
+    from: process.env.MAIL,
+    to: email,
+    subject: "Email Verification",
+    text: `Please verify your email by clicking on the following link.`,
+    html: `<!DOCTYPE html>
+<html>
+<head>
+  <style>
+  a{
+  padding:10px 20px;
+  background-color:white;
+  color:blue;
+  border-radius:6px;
+  font-weight:bold;
+  }
+  </style>
+</head>
+<body>
+  <h1>Please verify your email by clicking on the following link</h1>
+  <a href=${verificationLink}>
+  Verify Email
+  </a>
+</body>
+</html>`,
+  };
+
+  transporter.sendMail(mailOptions, (error, info) => {
+    if (error) {
+      console.log("Error sending mail. Please try again.");
+    }
+    console.log("Mail sent successfully!");
+  });
+
+  sendToken(
+    res,
+    user,
+    200,
+    `Verification email sent. Please check your email.`
+  );
+});
+
+const emailVerify = TryCatch(async (req, res, next) => {
+  const { token } = req.query;
+  const user = await User.findOne({ verificationToken: token });
+  if (!user) return next(new ErrorHandler("Invalid or expired token", 400));
+  user.verified = true;
+  user.verificationToken = undefined;
+  await user.save();
+  return res.status(200).json({
+    success: true,
+    message: "Email verified successfully. You can now log in.",
+  });
 });
 
 const login = TryCatch(async (req, res, next) => {
@@ -112,6 +179,6 @@ export {
   logout,
   myProfile,
   newUser,
-  resetPassword
+  resetPassword,
+  emailVerify,
 };
-

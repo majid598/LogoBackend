@@ -30,6 +30,8 @@ const schema = mongoose.Schema(
     subscribedPlan: {
       type: String,
     },
+    verificationToken: { type: String },
+    verified: { type: Boolean, default: false },
     logos: [
       {
         type: mongoose.Schema.Types.ObjectId,

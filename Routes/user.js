@@ -7,6 +7,7 @@ import {
   myProfile,
   newUser,
   resetPassword,
+  emailVerify
 } from "../Controllers/user.js";
 import { isAuthenticated } from "../Middlewares/auth.js";
 const router = express.Router();
@@ -14,6 +15,8 @@ const router = express.Router();
 router.post("/new", newUser);
 
 router.post("/login", login);
+
+router.get("/verify-email", emailVerify);
 
 router.get(
   "/google",

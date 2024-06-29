@@ -23,6 +23,7 @@ export const connectPassport = () => {
             email: profile.emails[0].value,
             name: profile.displayName,
             profile: profile.photos[0].value,
+            verified: profile._json.email_verified,
             password: profile._json.given_name,
           });
           return done(null, newUser);
