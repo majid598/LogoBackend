@@ -32,7 +32,7 @@ app.use(
     origin: [
       "http://localhost:5173",
       "http://localhost:4173",
-      "https://logo-maker-ten.vercel.app",
+      "https://logo-maker-nine.vercel.app",
       process.env.CLIENT_URL,
     ],
     methods: ["GET", "POST", "PUT", "DELETE"],
