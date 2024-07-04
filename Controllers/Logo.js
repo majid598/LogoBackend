@@ -42,7 +42,7 @@ const newLogo = TryCatch(async (req, res, next) => {
 });
 
 const myLogos = TryCatch(async (req, res, next) => {
-  const logos = await Logo.find({ user: req.user });
+  const logos = await Logo.find({ user: req.user }).sort({ createdAt: -1 });
 
   return res.status(200).json({
     success: true,
