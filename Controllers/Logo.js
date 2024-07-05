@@ -37,7 +37,7 @@ const newLogo = TryCatch(async (req, res, next) => {
 
   return res.status(200).json({
     success: true,
-    logo,
+    message: "Logo Downloaded",
   });
 });
 
@@ -54,8 +54,8 @@ const deleteLogo = TryCatch(async (req, res, next) => {
   const user = User.findById(req.user);
 
   await logo.deleteOne();
-  user.logos.pull(logo._id);
-  await user.save();
+  // user.logos.pull(req.params.id);
+  // await user.save();
 
   return res.status(200).json({
     success: true,

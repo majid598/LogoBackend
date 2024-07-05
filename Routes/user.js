@@ -9,6 +9,7 @@ import {
   logout,
   myProfile,
   newUser,
+  resendEmail,
   resetPassword,
 } from "../Controllers/user.js";
 import { isAuthenticated } from "../Middlewares/auth.js";
@@ -38,6 +39,8 @@ router.get(
 router.get("/logout", isAuthenticated, logout);
 
 router.get("/me", isAuthenticated, myProfile);
+
+router.post("/resend-email", isAuthenticated, resendEmail);
 
 router.put("/me/profile/edit", isAuthenticated, editProfile);
 router.delete("/me/profile/delete", isAuthenticated, deleteAccount);
