@@ -29,7 +29,7 @@ export const connectPassport = () => {
 
           const token = jwt.sign({ _id: user._id }, process.env.JWT_SECRET);
           
-          return done(null, {user,token));
+          return done(null, {user,token}));
         } else {
           return done(null, user);
         }
