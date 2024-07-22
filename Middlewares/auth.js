@@ -3,7 +3,7 @@ import ErrorHandler from "../Utils/utility.js";
 import { User } from "../Models/user.js";
 
 export const isAuthenticated = async (req, res, next) => {
-  const token = req.headers("token")
+  const token = req.header("token")
 
   if (!token) return next(new ErrorHandler("Please Login first", 404));
 
