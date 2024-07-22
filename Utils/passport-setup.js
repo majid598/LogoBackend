@@ -13,12 +13,12 @@ export const connectPassport = () => {
         callbackURL: "https://logobackend-0yl2.onrender.com/api/v1/user/google/login",
       },
       async function (accessToken, refreshToken, profile, done) {
-        const user = await User.findOne({
+        let user = await User.findOne({
           googleId: profile.id,
         });
 
         if (!user) {
-          const newUser = await User.create({
+          user = await User.create({
             googleId: profile.id,
             email: profile.emails[0].value,
             name: profile.displayName,
@@ -26,7 +26,10 @@ export const connectPassport = () => {
             verified: profile._json.email_verified,
             password: profile._json.given_name,
           });
-          return done(null, newUser);
+
+          const token = jwt.sign({ _id: user._id }, process.env.JWT_SECRET);
+          
+          return done(null, {user,token));
         } else {
           return done(null, user);
         }
