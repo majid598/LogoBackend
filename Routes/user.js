@@ -30,11 +30,21 @@ router.get(
 
 router.get(
   "/google/login",
-  passport.authenticate("google", { failureRedirect: "/api/v1/user/google" }),
-  (req, res) => {
-    res.redirect(process.env.CLIENT_URL);
-  }
-);
+(req, res, next) => {
+    passport.authenticate('google', (err, data) => {
+      if (err) {
+        return next(err);
+      }
+      if (!data) {
+        return res.status(401).json({ message: 'Authentication failed' });
+      }
+
+      // Here you can set the JWT token in a cookie or send it in the response body
+      res.status(200).json({token:data.token}); // Set the JWT in an HTTP-only cookie
+      res.redirect('/'); // Redirect to the desired URL after login
+    })(req, res, next);
+  });
+
 
 router.get("/logout", isAuthenticated, logout);
 
