@@ -10,9 +10,10 @@ export const cookieOptions = {
 export const sendToken = (res, user, code, message) => {
   const token = jwt.sign({ _id: user._id }, process.env.JWT_SECRET);
 
-  return res.status(code).cookie("logoMaker-token", token, cookieOptions).json({
+  return res.status(code).json({
     success: true,
     user,
+    token,
     message,
   });
 };
